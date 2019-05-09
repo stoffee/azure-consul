@@ -17,7 +17,7 @@ variable "auto_join_tenant_id" {
 
 # Optional variables
 variable "consul_version" {
-  default     = "1.2.2"
+  default     = "1.5.0"
   description = "Consul version to use"
 }
 
