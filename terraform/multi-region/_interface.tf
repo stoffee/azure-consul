@@ -15,18 +15,6 @@ variable "auto_join_tenant_id" {
   type = "string"
 }
 
-variable "consul_resource_group" {
-  type = "string"
-}
-
-variable "location1" {
-  type = "string"
-}
-
-variable "location2" {
-  type = "string"
-}
-
 # Optional variables
 variable "consul_version" {
   default     = "1.2.2"
