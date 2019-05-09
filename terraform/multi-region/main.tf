@@ -2,7 +2,12 @@ terraform {
   required_version = ">= 0.10.1"
 }
 
-provider "azurerm" {}
+provider "azurerm" {
+  subscription_id = "${var.auto_join_subscription_id}"
+  client_id = "${var.auto_join_client_id}"
+  client_secret = "${var.auto_join_client_secret}"
+  tenant_id = "${var.auto_join_tenant_id}"
+}
 
 resource "azurerm_resource_group" "main" {
   name     = "consul-multi-region"
