@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.10.1"
+  required_version = ">= 0.11.13"
 }
 
 provider "azurerm" {
@@ -10,8 +10,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "consul-multi-region"
-  location = "westus"
+  name     = "${var.consul-resource-group}-rg"
+  location = "${var.location1}"
 }
 
 module "ssh_key" {
@@ -23,8 +23,8 @@ module "ssh_key" {
 module "network_westus" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
-  location              = "westus"
-  network_name          = "consul-westus"
+  location              = "${var.location1}"
+  network_name          = "cd-consul-westus"
   network_cidr          = "10.0.0.0/16"
   network_cidrs_public  = ["10.0.0.0/20"]
   network_cidrs_private = ["10.0.48.0/20", "10.0.64.0/20", "10.0.80.0/20"]
@@ -32,11 +32,11 @@ module "network_westus" {
   public_key_data       = "${module.ssh_key.public_key_data}"
 }
 
-module "network_eastus" {
+module "network_westus2" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
-  location              = "eastus"
-  network_name          = "consul-eastus"
+  location              = "${var.location2}"
+  network_name          = "cd-consul-westus2"
   network_cidr          = "10.1.0.0/16"
   network_cidrs_public  = ["10.1.0.0/20"]
   network_cidrs_private = ["10.1.48.0/20", "10.1.64.0/20", "10.1.80.0/20"]
@@ -48,8 +48,8 @@ module "consul_azure_westus" {
   source                    = "../modules/consul-azure"
   resource_group_name       = "${azurerm_resource_group.main.name}"
   consul_datacenter         = "consul-westus"
-  consul_join_wan           = ["consul-eastus"]
-  location                  = "westus"
+  consul_join_wan           = ["consul-westus2"]
+  location                  = "${var.location1}"
   cluster_size              = "${var.cluster_size}"
   private_subnet_ids        = ["${module.network_westus.subnet_private_ids}"]
   consul_version            = "${var.consul_version}"
@@ -62,14 +62,14 @@ module "consul_azure_westus" {
   auto_join_client_secret   = "${var.auto_join_client_secret}"
 }
 
-module "consul_azure_eastus" {
+module "consul_azure_westus2" {
   source                    = "../modules/consul-azure"
   resource_group_name       = "${azurerm_resource_group.main.name}"
-  consul_datacenter         = "consul-eastus"
+  consul_datacenter         = "consul-westus2"
   consul_join_wan           = ["consul-westus"]
-  location                  = "eastus"
+  location                  = "${var.location2}"
   cluster_size              = "${var.cluster_size}"
-  private_subnet_ids        = ["${module.network_eastus.subnet_private_ids}"]
+  private_subnet_ids        = ["${module.network_westus2.subnet_private_ids}"]
   consul_version            = "${var.consul_version}"
   vm_size                   = "${var.consul_vm_size}"
   os                        = "${var.os}"
@@ -80,11 +80,11 @@ module "consul_azure_eastus" {
   auto_join_client_secret   = "${var.auto_join_client_secret}"
 }
 
-resource "azurerm_virtual_network_peering" "peer-westus-to-eastus" {
-  name                         = "peer-westus-to-eastus"
+resource "azurerm_virtual_network_peering" "peer-westus-to-westus2" {
+  name                         = "peer-westus-to-westus2"
   resource_group_name          = "${azurerm_resource_group.main.name}"
   virtual_network_name         = "${module.network_westus.virtual_network_name}"
-  remote_virtual_network_id    = "${module.network_eastus.virtual_network_id}"
+  remote_virtual_network_id    = "${module.network_westus2.virtual_network_id}"
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
 
@@ -92,10 +92,10 @@ resource "azurerm_virtual_network_peering" "peer-westus-to-eastus" {
   allow_gateway_transit = false
 }
 
-resource "azurerm_virtual_network_peering" "peer-eastus-to-westus" {
-  name                         = "peer-eastus-to-westus"
+resource "azurerm_virtual_network_peering" "peer-westus2-to-westus" {
+  name                         = "peer-westus2-to-westus"
   resource_group_name          = "${azurerm_resource_group.main.name}"
-  virtual_network_name         = "${module.network_eastus.virtual_network_name}"
+  virtual_network_name         = "${module.network_westus2.virtual_network_name}"
   remote_virtual_network_id    = "${module.network_westus.virtual_network_id}"
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
