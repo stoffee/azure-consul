@@ -20,8 +20,8 @@ variable "prefix" {
 }
 
 variable "region" {
-  type = "string"
-  defaul = "westus2"
+  type    = "string"
+  default = "westus2"
 }
 
 # Optional variables

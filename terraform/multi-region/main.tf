@@ -4,9 +4,9 @@ terraform {
 
 provider "azurerm" {
   subscription_id = "${var.auto_join_subscription_id}"
-  client_id = "${var.auto_join_client_id}"
-  client_secret = "${var.auto_join_client_secret}"
-  tenant_id = "${var.auto_join_tenant_id}"
+  client_id       = "${var.auto_join_client_id}"
+  client_secret   = "${var.auto_join_client_secret}"
+  tenant_id       = "${var.auto_join_tenant_id}"
 }
 
 resource "azurerm_resource_group" "main" {
@@ -80,7 +80,7 @@ module "consul_azure_eastus" {
   auto_join_client_secret   = "${var.auto_join_client_secret}"
 }
 
-resource "azurerm_virtual_network_peering" "peer-westus-to-eastus" {
+resource "azurerm_virtual_network_peering" "peer-westus-to-westus2" {
   name                         = "${prefix}-peer-westus-to-westus2"
   resource_group_name          = "${azurerm_resource_group.main.name}"
   virtual_network_name         = "${module.network_westus.virtual_network_name}"
@@ -92,8 +92,8 @@ resource "azurerm_virtual_network_peering" "peer-westus-to-eastus" {
   allow_gateway_transit = false
 }
 
-resource "azurerm_virtual_network_peering" "peer-eastus-to-westus" {
-  name                         = "${prefix}-peer-eastus-to-westus"
+resource "azurerm_virtual_network_peering" "peer-westus2-to-westus" {
+  name                         = "${prefix}-peer-westus2-to-westus"
   resource_group_name          = "${azurerm_resource_group.main.name}"
   virtual_network_name         = "${module.network_eastus.virtual_network_name}"
   remote_virtual_network_id    = "${module.network_westus.virtual_network_id}"
