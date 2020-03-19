@@ -19,7 +19,12 @@ variable "prefix" {
   type = "string"
 }
 
-variable "region" {
+variable "region1" {
+  type    = "string"
+  default = "westus1"
+}
+
+variable "region2" {
   type    = "string"
   default = "westus2"
 }
