@@ -15,9 +15,18 @@ variable "auto_join_tenant_id" {
   type = "string"
 }
 
+variable "prefix" {
+  type = "string"
+}
+
+variable "region" {
+  type = "string"
+  defaul = "westus2"
+}
+
 # Optional variables
 variable "consul_version" {
-  default     = "1.5.0"
+  default     = "1.7.2"
   description = "Consul version to use"
 }
 
