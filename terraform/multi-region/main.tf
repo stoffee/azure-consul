@@ -24,7 +24,7 @@ module "network_westus" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
   location              = "${var.region1}"
-  network_name          = "${prefix}-consul-${var.region1}"
+  network_name          = "${var.prefix}-consul-${var.region1}"
   network_cidr          = "10.0.0.0/16"
   network_cidrs_public  = ["10.0.0.0/20"]
   network_cidrs_private = ["10.0.48.0/20", "10.0.64.0/20", "10.0.80.0/20"]
@@ -36,7 +36,7 @@ module "network_eastus" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
   location              = "${var.region2}"
-  network_name          = "${prefix}-consul-${var.region2}"
+  network_name          = "${ivar.prefix}-consul-${var.region2}"
   network_cidr          = "10.1.0.0/16"
   network_cidrs_public  = ["10.1.0.0/20"]
   network_cidrs_private = ["10.1.48.0/20", "10.1.64.0/20", "10.1.80.0/20"]
@@ -47,8 +47,8 @@ module "network_eastus" {
 module "consul_azure_westus" {
   source                    = "../modules/consul-azure"
   resource_group_name       = "${azurerm_resource_group.main.name}"
-  consul_datacenter         = "${prefix}-consul-${var.region1}"
-  consul_join_wan           = ["${prefix}-consul-${var.region2}"]
+  consul_datacenter         = "${var.prefix}-consul-${var.region1}"
+  consul_join_wan           = ["${var.prefix}-consul-${var.region2}"]
   location                  = "westus"
   cluster_size              = "${var.cluster_size}"
   private_subnet_ids        = ["${module.network_westus.subnet_private_ids}"]
@@ -65,8 +65,8 @@ module "consul_azure_westus" {
 module "consul_azure_eastus" {
   source                    = "../modules/consul-azure"
   resource_group_name       = "${azurerm_resource_group.main.name}"
-  consul_datacenter         = "${prefix}-consul-${var.region2}"
-  consul_join_wan           = ["${prefix}-consul-${var.region1}"]
+  consul_datacenter         = "${var.prefix}-consul-${var.region2}"
+  consul_join_wan           = ["${var.prefix}-consul-${var.region1}"]
   location                  = "westus2"
   cluster_size              = "${var.cluster_size}"
   private_subnet_ids        = ["${module.network_eastus.subnet_private_ids}"]
@@ -81,7 +81,7 @@ module "consul_azure_eastus" {
 }
 
 resource "azurerm_virtual_network_peering" "peer-region1-to-region2" {
-  name                         = "${prefix}-peer-${var.region1}-to-${var.region2}"
+  name                         = "${var.prefix}-peer-${var.region1}-to-${var.region2}"
   resource_group_name          = "${azurerm_resource_group.main.name}"
   virtual_network_name         = "${module.network_westus.virtual_network_name}"
   remote_virtual_network_id    = "${module.network_eastus.virtual_network_id}"
@@ -93,7 +93,7 @@ resource "azurerm_virtual_network_peering" "peer-region1-to-region2" {
 }
 
 resource "azurerm_virtual_network_peering" "peer-region2-to-region1" {
-  name                         = "${prefix}-peer-${var.region2}-to-${var.region1}"
+  name                         = "${var.prefix}-peer-${var.region2}-to-${var.region1}"
   resource_group_name          = "${azurerm_resource_group.main.name}"
   virtual_network_name         = "${module.network_eastus.virtual_network_name}"
   remote_virtual_network_id    = "${module.network_westus.virtual_network_id}"
