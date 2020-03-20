@@ -36,7 +36,7 @@ module "network_eastus" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
   location              = "${var.region2}"
-  network_name          = "${ivar.prefix}-consul-${var.region2}"
+  network_name          = "${var.prefix}-consul-${var.region2}"
   network_cidr          = "10.1.0.0/16"
   network_cidrs_public  = ["10.1.0.0/20"]
   network_cidrs_private = ["10.1.48.0/20", "10.1.64.0/20", "10.1.80.0/20"]
