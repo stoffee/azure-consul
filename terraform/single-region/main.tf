@@ -2,11 +2,16 @@ terraform {
   required_version = ">= 0.10.1"
 }
 
-provider "azurerm" {}
+provider "azurerm" {
+  subscription_id = "${var.auto_join_subscription_id}"
+  client_id       = "${var.auto_join_client_id}"
+  client_secret   = "${var.auto_join_client_secret}"
+  tenant_id       = "${var.auto_join_tenant_id}"
+}
 
 resource "azurerm_resource_group" "main" {
-  name     = "consul-single-region"
-  location = "westus"
+  name     = "${var.prefix}-consul"
+  location = "${var.region}"
 }
 
 module "ssh_key" {
@@ -18,8 +23,8 @@ module "ssh_key" {
 module "network_westus" {
   source                = "../modules/network-azure"
   resource_group_name   = "${azurerm_resource_group.main.name}"
-  location              = "westus"
-  network_name          = "consul-westus"
+  location              = "${var.region}"
+  network_name          = "${var.prefix}-consul-westus"
   network_cidr          = "10.0.0.0/16"
   network_cidrs_public  = ["10.0.0.0/20"]
   network_cidrs_private = ["10.0.48.0/20", "10.0.64.0/20", "10.0.80.0/20"]
@@ -30,8 +35,8 @@ module "network_westus" {
 module "consul_azure_westus" {
   source                    = "../modules/consul-azure"
   resource_group_name       = "${azurerm_resource_group.main.name}"
-  consul_datacenter         = "consul-westus"
-  location                  = "westus"
+  consul_datacenter         = "${var.prefix}-consul-westus"
+  location                  = "${var.region}"
   cluster_size              = "${var.cluster_size}"
   private_subnet_ids        = ["${module.network_westus.subnet_private_ids}"]
   consul_version            = "${var.consul_version}"
